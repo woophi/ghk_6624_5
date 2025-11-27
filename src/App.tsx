@@ -2,115 +2,108 @@ import { Button } from '@alfalab/core-components/button/cssm';
 import { Collapse } from '@alfalab/core-components/collapse/cssm';
 import { Divider } from '@alfalab/core-components/divider/cssm';
 import { Gap } from '@alfalab/core-components/gap/cssm';
-import { Grid } from '@alfalab/core-components/grid/cssm';
 import { PureCell } from '@alfalab/core-components/pure-cell/cssm';
 import { Slider } from '@alfalab/core-components/slider/cssm';
 import { Steps } from '@alfalab/core-components/steps/cssm';
-import { Tag } from '@alfalab/core-components/tag/cssm';
 import { Typography } from '@alfalab/core-components/typography/cssm';
 import { ChevronDownMIcon } from '@alfalab/icons-glyph/ChevronDownMIcon';
 import { ChevronUpMIcon } from '@alfalab/icons-glyph/ChevronUpMIcon';
 import { useEffect, useState } from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
 import fileImg from './assets/file.png';
 import hb from './assets/hb.png';
 import houseImg from './assets/house.png';
-import tabplusImg from './assets/tabplus.png';
+import img1 from './assets/img1.png';
+import img2 from './assets/img2.png';
+import img3 from './assets/img3.png';
+import img4 from './assets/img4.png';
+import img5 from './assets/img5.png';
+import img6 from './assets/img6.png';
 import { LS, LSKeys } from './ls';
 import { appSt } from './style.css';
 import { formatWord } from './utils/words';
 
-import { CheckmarkCircleSIcon } from '@alfalab/icons-glyph/CheckmarkCircleSIcon';
-
 const SLIDER_SUM = {
   default: 500_000,
-  min: 1_000,
+  min: 2_000,
   max: 10_000_000,
   step: 1_000,
 };
 
-const PERCENT = 0.1801;
+const PERCENT = 0.19;
 const faqs = [
   {
-    question: 'Есть ли комиссия?',
-    answer: ['Комиссия удерживается согласно вашему тарифу брокерского обслуживания.'],
-  },
-  {
-    question: 'Как выплачивается доход?',
-    answer: ['Доход начисляется на брокерский счет.'],
-  },
-  {
     question: 'Есть ли налог?',
-    answer: ['Налог начисляется на доход.'],
+    answer: ['Налог начисляется на доход'],
   },
   {
     question: 'Можно ли вывести деньги до конца срока?',
-    answer: ['Можно. Накопленный доход сохраняется.'],
+    answer: ['Только в определенных случаях, зафиксированных в условиях программы долгосрочного сбережения'],
+  },
+  {
+    question: 'Какую сумму нужно внести при оформлении договора?',
+    answer: ['Первый и последующие взносы — от 2 000 ₽.'],
+  },
+  {
+    question: 'Как получить до 360 000 ₽ от государства?',
+    answer: [
+      'Господдержка предоставляется в течение 10 лет после внесения первого взноса, если сумма взносов за год не меньше 2 000 ₽. Сумма господдержки зависит от размера ваших взносов и ежемесячного дохода, но не превышает 36 000 ₽ в год.',
+    ],
+  },
+  {
+    question: 'Когда выплачиваются накопления?',
+    answer: ['Через 15 лет или по достижении возраста 55 лет для женщин и 60 лет для мужчин.'],
   },
 ];
 
 const advantages = [
   {
-    title: 'Высокая доходность',
-    description: 'Зафиксируйте выгодную ставку на срок от 1 до 10 лет',
+    title: 'До 360 000 ₽',
+    description: 'Добавит государство после вступления в программу',
     img: houseImg,
   },
   {
-    title: 'Дополнительный доход',
-    description: 'Получайте прибыль от возможного роста стоимости облигации',
+    title: 'До 1 320 000 ₽',
+    description: 'Можно получить за счёт налогового вычета',
     img: fileImg,
   },
+];
+
+const targets = [
   {
-    title: 'Лёгкий старт',
-    description: 'Начать можно с 1000 ₽',
-    img: tabplusImg,
+    title: 'Получать пассивный доход от накоплений',
+    img: img1,
+  },
+  {
+    title: 'Накопить на образование детей',
+    img: img2,
+  },
+  {
+    title: 'Выйти на пенсию досрочно',
+    img: img3,
+  },
+  {
+    title: 'Больше путешествовать',
+    img: img4,
+  },
+  {
+    title: 'Купить дом и жить у моря на пенсии',
+    img: img5,
+  },
+  {
+    title: 'Создать начальный капитал для детей',
+    img: img6,
   },
 ];
 
-const LINK = 'alfabank://investments/open_investments_account?type=BS';
-
-const tags = [
-  { key: 'ofz', label: 'ОФЗ' },
-  { key: 'banks', label: 'Банки' },
-  { key: 'companies', label: 'Компании' },
-];
-
-const tagsData = {
-  ofz: {
-    title: 'Облигации федерального займа',
-    subtitle: 'Самый надёжный инструмент на рынке',
-    leftTitle: 'Доходность',
-    leftValue: '12-15%',
-    rightTitle: 'Риск',
-    rightValue: 'Минимальный',
-    rows: ['Гарантия государства', 'Высокая ликвидность', 'Для осторожных инвесторов'],
-  },
-
-  banks: {
-    title: 'Облигации крупных банков',
-    subtitle: 'Баланс надёжности и доходности',
-    leftTitle: 'Доходность',
-    leftValue: '15-17%',
-    rightTitle: 'Риск',
-    rightValue: 'Минимальный',
-    rows: ['Крупнейшие банки России', 'Регулярные купоны', 'Оптимальный выбор'],
-  },
-  companies: {
-    title: 'Корпоративные облигации',
-    subtitle: 'Максимальная доходность',
-    leftTitle: 'Доходность',
-    leftValue: '16-18%',
-    rightTitle: 'Риск',
-    rightValue: 'Средний',
-    rows: ['Крупнейшие компании', 'Высокий доход', 'Для опытных инвесторов'],
-  },
-};
+const LINK =
+  'alfabank://multistep-route?fromModule=FORM&version=2&stepNumber=0&alias=risk-notification-signer&prefilledDataID=1001&productType=NPF';
 
 export const App = () => {
   const [loading, setLoading] = useState(false);
   const [sliderSum, setSliderSum] = useState(SLIDER_SUM.default);
-  const [sliderTerm, setSliderTerm] = useState(12);
+  const [sliderTerm, setSliderTerm] = useState(15);
   const [collapsedItems, setCollapsedItem] = useState<string[]>([]);
-  const [selectedTag, setSelectedTag] = useState<'ofz' | 'banks' | 'companies'>('ofz');
 
   useEffect(() => {
     if (!LS.getItem(LSKeys.UserId, null)) {
@@ -118,11 +111,10 @@ export const App = () => {
     }
   }, []);
 
-  const incomeProfitWithSum = Math.floor(((sliderSum * PERCENT) / 12) * sliderTerm);
-  const tagData = tagsData[selectedTag];
+  const incomeProfitWithSum = Math.floor(((sliderSum * PERCENT) / 12) * (sliderTerm * 12));
 
   const submit = () => {
-    window.gtag('event', '6624_card_activate', { var: 'var2' });
+    window.gtag('event', '6624_card_activate', { var: 'var5' });
     setLoading(true);
 
     // sendDataToGA({
@@ -146,10 +138,10 @@ export const App = () => {
       <div className={appSt.container}>
         <div className={appSt.box}>
           <Typography.TitleResponsive tag="h1" view="large" font="system" weight="semibold">
-            Облигации
+            Программа долгосрочных сбережений
           </Typography.TitleResponsive>
           <Typography.Text view="primary-small" color="secondary">
-            Это «заём» государству или компании: вы даёте деньги под процент и к сроку получаете купоны и возврат номинала
+            Откладывайте с выгодой: получите процент на вклад, поддержку от государства и налоговый вычет
           </Typography.Text>
 
           <img src={hb} alt="hb" width="100%" height={133} style={{ objectFit: 'contain' }} />
@@ -190,31 +182,42 @@ export const App = () => {
             <Typography.Text view="secondary-medium">До 16% годовых</Typography.Text>
             <Divider />
             <Typography.Text style={{ height: 32 }} view="secondary-medium">
-              Выплата в конце срока
+              Фиксированная ставка
             </Typography.Text>
             <Divider />
-            <Typography.Text style={{ height: 48 }} view="secondary-medium">
-              Страхование АСВ
-            </Typography.Text>
-            <Divider />
-            <Typography.Text view="secondary-medium">Потеря % при досрочном снятии</Typography.Text>
+            <Typography.Text view="secondary-medium">Нет налогового вычета</Typography.Text>
           </div>
           <div className={appSt.boxTableCell({ filled: true })}>
             <Typography.Text view="primary-small" weight="bold" style={{ marginBottom: '12px' }}>
-              Квазидепозит
+              Стратегии
             </Typography.Text>
-            <Typography.Text view="secondary-medium">До 18% годовых</Typography.Text>
+            <Typography.Text view="secondary-medium">До 27% годовых</Typography.Text>
             <Divider />
             <Typography.Text style={{ height: 32 }} view="secondary-medium">
-              Выплата каждый месяц, неделю
+              Софинансирование государства
             </Typography.Text>
             <Divider />
-            <Typography.Text style={{ height: 48 }} view="secondary-medium">
-              Выплаты гарантированы эмитентом
-            </Typography.Text>
-            <Divider />
-            <Typography.Text view="secondary-medium">Накопленный доход сохраняется</Typography.Text>
+            <Typography.Text view="secondary-medium">Налоговый вычет до 88 000 ₽ в год</Typography.Text>
           </div>
+        </div>
+
+        <Typography.TitleResponsive style={{ marginTop: '12px' }} tag="h3" view="small" font="system" weight="semibold">
+          Для каких целей
+        </Typography.TitleResponsive>
+
+        <div>
+          <Swiper style={{ marginLeft: '0' }} spaceBetween={12} slidesPerView="auto">
+            {targets.map((target, index) => (
+              <SwiperSlide className={appSt.sliderContainer} key={index}>
+                <div className={appSt.sliderBox}>
+                  <img src={target.img} width="100%" height={112} style={{ marginTop: '-60px' }} alt={target.title} />
+                  <Typography.Text view="primary-small" weight="bold" style={{ maxWidth: '180px' }}>
+                    {target.title}
+                  </Typography.Text>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
 
         <Typography.TitleResponsive style={{ marginTop: '12px' }} tag="h3" view="small" font="system" weight="semibold">
@@ -224,92 +227,29 @@ export const App = () => {
         <Steps isVerticalAlign={true} interactive={false} className={appSt.stepStyle}>
           <span>
             <Typography.Text tag="p" defaultMargins={false} view="component-primary">
-              Открываете брокерский счет
+              Вносите от 2000 ₽ год
             </Typography.Text>
             <Typography.Text view="primary-small" color="secondary">
-              Прям в мобильном приложении банка
+              Для удобства можно подключить автоплатёж
             </Typography.Text>
           </span>
           <span>
             <Typography.Text tag="p" defaultMargins={false} view="component-primary">
-              Покупаете облигации
+              Государство добавляет до 36 000 ₽ в год и возвращает налоговый вычет до 88 000 ₽
             </Typography.Text>
             <Typography.Text view="primary-small" color="secondary">
-              Подобрали для вас наиболее интересные
+              Гос.поддержку можно получать до 10 лет, а налоговый вычет — минимум 15 лет
             </Typography.Text>
           </span>
           <span>
             <Typography.Text tag="p" defaultMargins={false} view="component-primary">
-              Получаете доход
+              Фонд инвестирует деньги и начисляет доход ежегодно
             </Typography.Text>
-            <Typography.Text view="primary-small" color="secondary">
-              Проценты начисляются ежедневно на ваш счёт
+            <Typography.Text view="primary-small" color="link">
+              Посмотреть доходы за 2024 год
             </Typography.Text>
           </span>
         </Steps>
-
-        <Typography.TitleResponsive style={{ marginTop: '12px' }} tag="h3" view="small" font="system" weight="semibold">
-          Типы облигаций
-        </Typography.TitleResponsive>
-
-        <div className={appSt.tags}>
-          {tags.map(itemTag => (
-            <Tag
-              size="s"
-              view="outlined"
-              shape="rectangular"
-              checked={selectedTag === itemTag.key}
-              onClick={() => setSelectedTag(itemTag.key as typeof selectedTag)}
-              key={itemTag.key}
-            >
-              {itemTag.label}
-            </Tag>
-          ))}
-        </div>
-
-        <div className={appSt.boxCalc}>
-          <div>
-            <Typography.TitleResponsive tag="h5" view="xsmall" font="system" weight="semibold">
-              {tagData.title}
-            </Typography.TitleResponsive>
-            <Typography.Text view="primary-small" color="secondary">
-              {tagData.subtitle}
-            </Typography.Text>
-          </div>
-
-          <Grid.Row gutter={{ mobile: 8, desktop: 16 }}>
-            <Grid.Col width="6">
-              <div className={appSt.gridItemBox}>
-                <Typography.Text view="secondary-medium" color="secondary">
-                  {tagData.leftTitle}
-                </Typography.Text>
-                <Typography.Text view="primary-small" weight="medium">
-                  {tagData.leftValue}
-                </Typography.Text>
-              </div>
-            </Grid.Col>
-            <Grid.Col width="6">
-              <div className={appSt.gridItemBox}>
-                <Typography.Text view="secondary-medium" color="secondary">
-                  {tagData.rightTitle}
-                </Typography.Text>
-                <Typography.Text view="primary-small" weight="medium">
-                  {tagData.rightValue}
-                </Typography.Text>
-              </div>
-            </Grid.Col>
-          </Grid.Row>
-
-          <div>
-            {tagData.rows.map((row, index) => (
-              <div className={appSt.row} key={index}>
-                <CheckmarkCircleSIcon />
-
-                <Typography.Text view="primary-small">{row}</Typography.Text>
-              </div>
-            ))}
-          </div>
-        </div>
 
         <Typography.TitleResponsive style={{ marginTop: '12px' }} tag="h3" view="small" font="system" weight="semibold">
           Расчитайте доход
@@ -343,15 +283,15 @@ export const App = () => {
                 Срок
               </Typography.Text>
               <Typography.Text view="primary-medium" weight="medium">
-                {formatWord(sliderTerm, ['месяц', 'месяца', 'месяцев'])}
+                {formatWord(sliderTerm, ['год', 'года', 'лет'])}
               </Typography.Text>
             </div>
             <div style={{ marginTop: '12px' }}>
               <Slider
                 size={4}
                 value={sliderTerm}
-                min={0}
-                max={120}
+                min={15}
+                max={30}
                 step={1}
                 onChange={({ value }) => setSliderTerm(value)}
               />
